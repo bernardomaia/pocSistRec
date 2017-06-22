@@ -6,28 +6,26 @@ def remove(l,c):
           l.remove(word)
 
 bfile = open('WordList.txt','r')
-dfile = open('data.txt','r')
+dfile = open(sys.argv[1],'r')
 cfile = open('comt','r')
-out = open('BagOfSentences.txt','w')
+out = open('out_'+sys.argv[1],'w')
 
 clist = cfile.readlines()
 blist = bfile.readlines()
 dlist = dfile.readlines()
 
-number = int(sys.argv[1])
-
-
+number = int(dlist[0])
 dsf = []
 
-blist = map(str.strip, blist)
-clist = map(str.strip, clist)
+blist = list(map(str.strip, blist))
+clist = list(map(str.strip, clist))
 
-for line in dlist[0:number]:
+for line in dlist[1:]:
     newline = line.split()
     remove(newline,clist)
     dsf.append(newline)
 
-out.write("%s\n" % sys.argv[1])
+out.write(str(number)+"\n")
 for x in range(len(dsf)):
     newline = []
     index = 0
