@@ -8,7 +8,7 @@ data{
 }
 
 parameters {
-  matrix[T,U] alpha_user;
+  matrix[U,T] alpha_user;
   real mu_alpha_U;
   real sigma_alpha_U;
 }
@@ -16,12 +16,13 @@ parameters {
 
 
 model {
-  real alpha_indv[N];
+  real alpha_indv[N,T];
   for (n in 1:N)
-     alpha_indv[n] = alpha_user[indv_to_U[N]];
-  alpha ~ normal(mu_alpha, sigma_alpha);
-  mu_alpha ~ normal(0, 10);
-  sigma_alpha ~ normal(0,10);
+     for (t in 1:T)
+        alpha_indv[n,t] = alpha_user[indv_to_U[n],t];
+  alpha_user ~ normal(mu_alpha_U, sigma_alpha_U);
+  mu_alpha_U ~ normal(0, 10);
+  sigma_alpha_U ~ normal(0,10);
   
   S ~ normal(X' * alpha_indv)
 }  
