@@ -2,28 +2,23 @@ data{
   int T; //número de aspectos
   int N; //número de reviews 
   int<lower=1> U;// número de usuários
-  int<lower=1, upper=U> indv_to_U[N];
-  vector[N] S; //notas
-  matrix[T,N] X;
+  int<lower=1, upper=U> review_U[N];//indica o número do usuário que escreveu a review
+  real<lower=0, upper=10> S[N]; //notas
+  row_vector[T]  sT[N]; //nota extraída cada review para cada aspecto 
 }
 
 parameters {
-  matrix[U,T] alpha_user;
-  real mu_alpha_U;
-  real sigma_alpha_U;
+  vector<lower=0, upper=5>[T] mu_U[U];
+  vector<lower=0, upper=1>[T] mu;
+  real<lower=0,upper=5> sigma[U];
 }
 
-
-
-model {
-  real alpha_indv[N,T];
+model{
+  mu ~ normal(0, 1);
+  for (t in 1:U)
+    sigma[U] ~ cauchy(0, 5);
+  for (u in 1:U)
+    mu_U[u] ~ normal(mu,sigma[u]);
   for (n in 1:N)
-     for (t in 1:T)
-        alpha_indv[n,t] = alpha_user[indv_to_U[n],t];
-  alpha_user ~ normal(mu_alpha_U, sigma_alpha_U);
-  mu_alpha_U ~ normal(0, 10);
-  sigma_alpha_U ~ normal(0,10);
-  
-  S ~ normal(X' * alpha_indv)
+    S[n] ~ normal((sT[n]*mu_U[review_U[n]]),sigma[review_U[N]]);
 }  
-   
