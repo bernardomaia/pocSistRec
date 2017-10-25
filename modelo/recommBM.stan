@@ -1,24 +1,30 @@
 data{
   int T; //número de aspectos
-  int N; //número de reviews 
+  int R; //número de reviews 
   int<lower=1> U;// número de usuários
-  int<lower=1, upper=U> review_U[N];//indica o número do usuário que escreveu a review
-  real<lower=0, upper=10> S[N]; //notas
-  row_vector[T]  sT[N]; //nota extraída cada review para cada aspecto 
+  int<lower=1, upper=U> z[R];//indica o número do usuário que escreveu a review
+  real<lower=0, upper=10> S[R]; //notas
+  row_vector[T]  X[R]; //nota extraída cada review para cada aspecto
+  real<lower=1> alpha[T];
+  real cauchy_max;
+  real omega;
+
+
 }
 
 parameters {
   vector<lower=0, upper=5>[T] mu_U[U];
-  vector<lower=0, upper=1>[T] mu;
-  real<lower=0,upper=5> sigma[U];
+  simplex[T] mu;
+  real<lower=0,upper=5> sigma[T];
 }
 
 model{
-  mu ~ normal(0, 1);
-  for (t in 1:U)
-    sigma[U] ~ cauchy(0, 5);
+  mu ~ dirichlet(alpha);
+  for (t in 1:T)
+    sigma[t] ~ cauchy(0, cauchy_max);
   for (u in 1:U)
-    mu_U[u] ~ normal(mu,sigma[u]);
-  for (n in 1:N)
-    S[n] ~ normal((sT[n]*mu_U[review_U[n]]),sigma[review_U[N]]);
+      for(t in 1:T)
+        mu_U[u][t] ~ normal(mu[t],sigma[t]);
+  for (r in 1:R)
+    S[r] ~ normal(10.0/T *(X[r]*mu_U[z[r]]),omega);
 }  
